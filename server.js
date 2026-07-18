@@ -13,22 +13,30 @@ const PORT = process.env.PORT || 3000;
 
 const swaggerDocument = JSON.parse(readFileSync("./swagger.json", "utf8"));
 
-if (process.env.BASE_URL) {
-	swaggerDocument.servers = [
-		{
-			url: process.env.BASE_URL,
-			description: "Deployed server",
-		},
-	];
-}
-
 app.use(express.json());
 
 app.get("/", (req, res) => {
 	res.send("Todo API is running. Go to /api-docs to see the documentation.");
 });
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use(
+	"/api-docs",
+	(req, res, next) => {
+		const protocol = req.headers["x-forwarded-proto"] || req.protocol;
+		const host = req.get("host");
+
+		swaggerDocument.servers = [
+			{
+				url: process.env.BASE_URL || `${protocol}://${host}`,
+				description: "API server",
+			},
+		];
+
+		next();
+	},
+	swaggerUi.serve,
+	swaggerUi.setup(swaggerDocument),
+);
 
 app.use("/", routes);
 
