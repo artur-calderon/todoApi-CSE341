@@ -11,9 +11,6 @@ import errorHandler from "./middlewares/errorHandler.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Needed on Render so https is detected correctly
-app.set("trust proxy", 1);
-
 const swaggerDocument = JSON.parse(readFileSync("./swagger.json", "utf8"));
 
 app.use(express.json());
@@ -21,6 +18,15 @@ app.use(express.json());
 app.get("/", (req, res) => {
 	res.send("Todo API is running. Go to /api-docs to see the documentation.");
 });
+
+swaggerDocument.servers[0].url = `http://localhost:${PORT}`;
+
+if (process.env.RENDER_EXTERNAL_URL) {
+	swaggerDocument.servers.push({
+		url: process.env.RENDER_EXTERNAL_URL,
+		description: "Deployed server",
+	});
+}
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
