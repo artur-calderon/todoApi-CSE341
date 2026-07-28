@@ -2,16 +2,102 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Todo API",
-    "description": "API for a TODO application - CSE341 Project",
+    "description": "API for a TODO application - CSE341 Project. Authentication uses GitHub OAuth. Visit /login to sign in and /logout to sign out. POST, PUT, and DELETE routes require login.",
     "version": "1.0.0"
   },
   "servers": [
-   {
-    "url": "http://localhost:8080",
-    "description": "Local development"
-  }
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "GitHub OAuth login and logout"
+    },
+    {
+      "name": "Categories",
+      "description": "Category endpoints"
+    },
+    {
+      "name": "Todos",
+      "description": "Todo endpoints"
+    }
   ],
   "paths": {
+    "/login": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Login with GitHub",
+        "description": "Redirects the user to GitHub to create an account or log in. After success, the user is redirected back to /.",
+        "responses": {
+          "302": {
+            "description": "Redirect to GitHub OAuth"
+          }
+        }
+      }
+    },
+    "/github/callback": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "GitHub OAuth callback",
+        "description": "GitHub redirects here after login. Creates a new user account if it does not exist yet.",
+        "responses": {
+          "302": {
+            "description": "Redirect to home on success or to /api-docs on failure"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Logout",
+        "description": "Logs the current user out and ends the session.",
+        "responses": {
+          "302": {
+            "description": "Redirect to home after logout"
+          }
+        }
+      }
+    },
+    "/user": {
+      "get": {
+        "tags": ["Auth"],
+        "summary": "Get current logged in user",
+        "description": "Returns the current user if logged in. Requires authentication.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User is logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "You are logged in"
+                    },
+                    "user": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not logged in"
+          }
+        }
+      }
+    },
     "/categories": {
       "get": {
         "tags": ["Categories"],
@@ -38,6 +124,12 @@
       "post": {
         "tags": ["Categories"],
         "summary": "Create a new category",
+        "description": "Requires login with GitHub OAuth.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -59,6 +151,9 @@
           },
           "400": {
             "description": "Validation error - missing or invalid fields"
+          },
+          "401": {
+            "description": "Unauthorized - you must be logged in"
           },
           "500": {
             "description": "Server error"
@@ -106,6 +201,12 @@
       "put": {
         "tags": ["Categories"],
         "summary": "Update a category by id",
+        "description": "Requires login with GitHub OAuth.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -139,6 +240,9 @@
           "400": {
             "description": "Validation error - missing or invalid fields"
           },
+          "401": {
+            "description": "Unauthorized - you must be logged in"
+          },
           "404": {
             "description": "Category not found"
           },
@@ -150,6 +254,12 @@
       "delete": {
         "tags": ["Categories"],
         "summary": "Delete a category by id",
+        "description": "Requires login with GitHub OAuth.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -167,6 +277,9 @@
           },
           "400": {
             "description": "Invalid category id"
+          },
+          "401": {
+            "description": "Unauthorized - you must be logged in"
           },
           "404": {
             "description": "Category not found"
@@ -203,6 +316,12 @@
       "post": {
         "tags": ["Todos"],
         "summary": "Create a new todo",
+        "description": "Requires login with GitHub OAuth.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -227,6 +346,9 @@
           },
           "400": {
             "description": "Validation error - missing or invalid fields"
+          },
+          "401": {
+            "description": "Unauthorized - you must be logged in"
           },
           "500": {
             "description": "Server error"
@@ -274,6 +396,12 @@
       "put": {
         "tags": ["Todos"],
         "summary": "Update a todo by id",
+        "description": "Requires login with GitHub OAuth.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -310,6 +438,9 @@
           "400": {
             "description": "Validation error - missing or invalid fields"
           },
+          "401": {
+            "description": "Unauthorized - you must be logged in"
+          },
           "404": {
             "description": "Todo not found"
           },
@@ -321,6 +452,12 @@
       "delete": {
         "tags": ["Todos"],
         "summary": "Delete a todo by id",
+        "description": "Requires login with GitHub OAuth.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -339,6 +476,9 @@
           "400": {
             "description": "Invalid todo id"
           },
+          "401": {
+            "description": "Unauthorized - you must be logged in"
+          },
           "404": {
             "description": "Todo not found"
           },
@@ -350,7 +490,43 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "githubOAuth": {
+        "type": "oauth2",
+        "description": "Login by visiting GET /login in the browser. After GitHub authorizes you, a session cookie is created. Use that browser session for protected routes.",
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://github.com/login/oauth/authorize",
+            "tokenUrl": "https://github.com/login/oauth/access_token",
+            "scopes": {
+              "user:email": "Access user email"
+            }
+          }
+        }
+      }
+    },
     "schemas": {
+      "User": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "example": "507f1f77bcf86cd799439013"
+          },
+          "githubId": {
+            "type": "string",
+            "example": "12345678"
+          },
+          "username": {
+            "type": "string",
+            "example": "octocat"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "The Octocat"
+          }
+        }
+      },
       "Category": {
         "type": "object",
         "properties": {

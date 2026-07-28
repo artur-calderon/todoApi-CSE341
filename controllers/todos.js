@@ -4,7 +4,6 @@ import { db } from "../models/database/index.js";
 const todosCollection = db.collection("todos");
 const categoriesCollection = db.collection("categories");
 
-// GET /todos - get all todos
 async function getAllTodos(req, res, next) {
 	try {
 		const todos = await todosCollection.find().toArray();
@@ -14,7 +13,6 @@ async function getAllTodos(req, res, next) {
 	}
 }
 
-// GET /todos/:id - get one todo by id
 async function getTodoById(req, res, next) {
 	try {
 		const id = req.params.id;
@@ -37,7 +35,6 @@ async function getTodoById(req, res, next) {
 	}
 }
 
-// POST /todos - create a new todo
 async function createTodo(req, res, next) {
 	try {
 		const { title, description, completed, priority, dueDate, categoryId } = req.body;
@@ -91,7 +88,6 @@ async function createTodo(req, res, next) {
 	}
 }
 
-// PUT /todos/:id - update a todo
 async function updateTodo(req, res, next) {
 	try {
 		const id = req.params.id;
@@ -159,7 +155,6 @@ async function updateTodo(req, res, next) {
 	}
 }
 
-// DELETE /todos/:id - delete a todo
 async function deleteTodo(req, res, next) {
 	try {
 		const id = req.params.id;

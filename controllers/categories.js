@@ -3,7 +3,6 @@ import { db } from "../models/database/index.js";
 
 const categoriesCollection = db.collection("categories");
 
-// GET /categories - get all categories
 async function getAllCategories(req, res, next) {
 	try {
 		const categories = await categoriesCollection.find().toArray();
@@ -13,7 +12,6 @@ async function getAllCategories(req, res, next) {
 	}
 }
 
-// GET /categories/:id - get one category by id
 async function getCategoryById(req, res, next) {
 	try {
 		const id = req.params.id;
@@ -36,7 +34,6 @@ async function getCategoryById(req, res, next) {
 	}
 }
 
-// POST /categories - create a new category
 async function createCategory(req, res, next) {
 	try {
 		const { name, description, color } = req.body;
@@ -63,7 +60,6 @@ async function createCategory(req, res, next) {
 	}
 }
 
-// PUT /categories/:id - update a category
 async function updateCategory(req, res, next) {
 	try {
 		const id = req.params.id;
@@ -104,7 +100,6 @@ async function updateCategory(req, res, next) {
 	}
 }
 
-// DELETE /categories/:id - delete a category
 async function deleteCategory(req, res, next) {
 	try {
 		const id = req.params.id;
