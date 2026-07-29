@@ -4,9 +4,13 @@ import { db } from "../models/database/index.js";
 const todosCollection = db.collection("todos");
 const categoriesCollection = db.collection("categories");
 
+function getLoggedInUserId(req) {
+	return new ObjectId(req.user._id);
+}
+
 async function getAllTodos(req, res, next) {
 	try {
-		const todos = await todosCollection.find().toArray();
+		const todos = await todosCollection.find({ userId: getLoggedInUserId(req) }).toArray();
 		res.status(200).json(todos);
 	} catch (error) {
 		next(error);
@@ -22,7 +26,10 @@ async function getTodoById(req, res, next) {
 			throw new Error("Invalid todo id");
 		}
 
-		const todo = await todosCollection.findOne({ _id: new ObjectId(id) });
+		const todo = await todosCollection.findOne({
+			_id: new ObjectId(id),
+			userId: getLoggedInUserId(req),
+		});
 
 		if (!todo) {
 			res.status(404);
@@ -75,6 +82,7 @@ async function createTodo(req, res, next) {
 			priority: priority,
 			dueDate: dueDate,
 			categoryId: new ObjectId(categoryId),
+			userId: getLoggedInUserId(req),
 		};
 
 		const result = await todosCollection.insertOne(newTodo);
@@ -138,7 +146,7 @@ async function updateTodo(req, res, next) {
 		};
 
 		const result = await todosCollection.updateOne(
-			{ _id: new ObjectId(id) },
+			{ _id: new ObjectId(id), userId: getLoggedInUserId(req) },
 			{ $set: updatedTodo }
 		);
 
@@ -164,7 +172,10 @@ async function deleteTodo(req, res, next) {
 			throw new Error("Invalid todo id");
 		}
 
-		const result = await todosCollection.deleteOne({ _id: new ObjectId(id) });
+		const result = await todosCollection.deleteOne({
+			_id: new ObjectId(id),
+			userId: getLoggedInUserId(req),
+		});
 
 		if (result.deletedCount === 0) {
 			res.status(404);

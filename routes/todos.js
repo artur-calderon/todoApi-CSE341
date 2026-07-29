@@ -10,8 +10,8 @@ import isAuthenticated from "../middlewares/isAuthenticated.js";
 
 const router = Router();
 
-router.get("/", getAllTodos);
-router.get("/:id", getTodoById);
+router.get("/", isAuthenticated, getAllTodos);
+router.get("/:id", isAuthenticated, getTodoById);
 router.post("/", isAuthenticated, createTodo);
 router.put("/:id", isAuthenticated, updateTodo);
 router.delete("/:id", isAuthenticated, deleteTodo);

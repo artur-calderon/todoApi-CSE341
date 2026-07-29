@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "Todo API",
-    "description": "API for a TODO application - CSE341 Project. Authentication uses GitHub OAuth. Visit /login to sign in and /logout to sign out. POST, PUT, and DELETE routes require login.",
+    "description": "API for a TODO application - CSE341 Project. Authentication uses GitHub OAuth. Visit /login to sign in and /logout to sign out. All todo routes require login and only return or modify todos created by the logged-in user. To demo in Swagger: open /login in this same browser, then use Try it out on /api-docs (the session cookie is sent automatically).",
     "version": "1.0.0"
   },
   "servers": [
@@ -22,7 +22,7 @@
     },
     {
       "name": "Todos",
-      "description": "Todo endpoints"
+      "description": "Todo endpoints scoped to the logged-in user"
     }
   ],
   "paths": {
@@ -293,10 +293,16 @@
     "/todos": {
       "get": {
         "tags": ["Todos"],
-        "summary": "Get all todos",
+        "summary": "Get all todos for the logged-in user",
+        "description": "Requires login with GitHub OAuth. Returns only todos created by the current user.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "List of all todos",
+            "description": "List of todos belonging to the logged-in user",
             "content": {
               "application/json": {
                 "schema": {
@@ -308,6 +314,9 @@
               }
             }
           },
+          "401": {
+            "description": "Unauthorized - you must be logged in"
+          },
           "500": {
             "description": "Server error"
           }
@@ -316,7 +325,7 @@
       "post": {
         "tags": ["Todos"],
         "summary": "Create a new todo",
-        "description": "Requires login with GitHub OAuth.",
+        "description": "Requires login with GitHub OAuth. The new todo is automatically linked to the logged-in user.",
         "security": [
           {
             "githubOAuth": []
@@ -360,6 +369,12 @@
       "get": {
         "tags": ["Todos"],
         "summary": "Get a todo by id",
+        "description": "Requires login with GitHub OAuth. Returns the todo only if it belongs to the logged-in user.",
+        "security": [
+          {
+            "githubOAuth": []
+          }
+        ],
         "parameters": [
           {
             "name": "id",
@@ -385,8 +400,11 @@
           "400": {
             "description": "Invalid todo id"
           },
+          "401": {
+            "description": "Unauthorized - you must be logged in"
+          },
           "404": {
-            "description": "Todo not found"
+            "description": "Todo not found or does not belong to the logged-in user"
           },
           "500": {
             "description": "Server error"
@@ -396,7 +414,7 @@
       "put": {
         "tags": ["Todos"],
         "summary": "Update a todo by id",
-        "description": "Requires login with GitHub OAuth.",
+        "description": "Requires login with GitHub OAuth. Updates the todo only if it belongs to the logged-in user.",
         "security": [
           {
             "githubOAuth": []
@@ -442,7 +460,7 @@
             "description": "Unauthorized - you must be logged in"
           },
           "404": {
-            "description": "Todo not found"
+            "description": "Todo not found or does not belong to the logged-in user"
           },
           "500": {
             "description": "Server error"
@@ -452,7 +470,7 @@
       "delete": {
         "tags": ["Todos"],
         "summary": "Delete a todo by id",
-        "description": "Requires login with GitHub OAuth.",
+        "description": "Requires login with GitHub OAuth. Deletes the todo only if it belongs to the logged-in user.",
         "security": [
           {
             "githubOAuth": []
@@ -480,7 +498,7 @@
             "description": "Unauthorized - you must be logged in"
           },
           "404": {
-            "description": "Todo not found"
+            "description": "Todo not found or does not belong to the logged-in user"
           },
           "500": {
             "description": "Server error"
@@ -493,7 +511,7 @@
     "securitySchemes": {
       "githubOAuth": {
         "type": "oauth2",
-        "description": "Login by visiting GET /login in the browser. After GitHub authorizes you, a session cookie is created. Use that browser session for protected routes.",
+        "description": "Login by visiting GET /login in the same browser. After GitHub authorizes you, a session cookie is created and Swagger Try it out will use that cookie automatically.",
         "flows": {
           "authorizationCode": {
             "authorizationUrl": "https://github.com/login/oauth/authorize",
@@ -597,6 +615,11 @@
           "categoryId": {
             "type": "string",
             "example": "507f1f77bcf86cd799439011"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Id of the user who owns this todo",
+            "example": "507f1f77bcf86cd799439013"
           }
         }
       },
